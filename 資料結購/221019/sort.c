@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
+#include<windows.h>
 
 #define MAX 4,294,967,295
 
@@ -11,37 +12,47 @@ unsigned rang(void);
 
 int main(){
     unsigned *num, N, i, *numQ;
-    time_t tm;
+    clock_t tm;
+    double tm_sec_S, tm_sec_Q;
     //printf("%u", rang());
     srand((unsigned)time(0)+getpid());    //RAND_MAX
     scanf("%u", &N);
-    num = (unsigned*)malloc(sizeof(unsigned) * N);
+    num = (unsigned*)malloc(sizeof(unsigned int) * N);
+    numQ = (unsigned*)malloc(sizeof(unsigned int) * N);
 
     for(i = 0; i < N; i++){
-        num[i] = rang()/(unsigned)RAND_MAX*rand()/RAND_MAX*rand() + 1;
-        printf("%10u ", num[i]);
+        num[i] =  rang()/(unsigned)RAND_MAX*rand()/RAND_MAX*rand() + 1 ;
+        numQ[i] = num[i];
         if(i % 10 == 0 && i != 0) printf("\n");
+        printf("%10u ", num[i]);
+        
     }
     printf("\n\n");
-    numQ = num;
 
     tm = clock();
     Selection_sort(num, N);
     for(i = 0; i < N; i++){
+    	if(i % 10 == 0 && i != 0) printf("\n");
         printf("%10u ", num[i]);
-        if(i % 10 == 0 && i != 0) printf("\n");
     }
     printf("\n");
-    printf("Selection_sort execution time: %u\n\n", clock()-tm);
+    tm_sec_S = (clock()-tm);
+    printf("Selection_sort execution time: %.3fs\n\n", tm_sec_S/1000);
+    //printf("Selection_sort execution time: %u\n\n", (clock()-tm));
     
 	tm = clock();
 	Quick_sort(numQ, 0, N-1);
 	for(i = 0; i < N; i++){
+		if(i % 10 == 0 && i != 0) printf("\n");
         printf("%10u ", numQ[i]);
-        if(i % 10 == 0 && i != 0) printf("\n");
     }
     printf("\n");
-    printf("Quick_sort execution time: %u\n", clock()-tm);
+    tm_sec_Q = (clock()-tm);
+    printf("Quick_sort execution time: %.3fs\n\n", tm_sec_Q/1000);
+    //printf("Quick_sort execution time: %u\n\n", clock()-tm);
+    
+    
+    
 	
 
     free(num);
@@ -61,21 +72,28 @@ void Selection_sort(unsigned *num, unsigned N){
 }
 
 void Quick_sort(unsigned *num, unsigned l, unsigned r){
-    unsigned p, i, j;
-    i = l+1; j = r; p = l;
-    if(r-l < 2) return;
-	while(i < j){
-		if(num[i] > num[p]){
-			if(num[j] >= num[p]) j--;
-			else if(num[j] < num[p]){
-				swap(&num[i++],&num[j--]);
-			}
-		}else i++;
+    unsigned p, i, j, c;
+    p = l; i = l+1; j = r;
+    if(l < r){
+		while(1){
+			while(i < r && num[i] < num[p]) i++;
+			while(j >= i && num[j] >= num[p]) j--;
+//			printf("%3u%3u\n", i, j);
+			if(i >= j) break;
+			else swap(&num[i++], &num[j--]);
+			
+//			for(c = l; c <= r; c++){
+//				printf("%u ", num[c]);
+//			}printf("\ni = %u j = %u\n", i, j);
+//			system("pause");
+		}
+		swap(&num[j], &num[p]);
+		
+		Quick_sort(num, l, j);
+		Quick_sort(num, i, r);
 	}
-	if(j != l+1) swap(&num[p], &num[j]);
+	return;
 	
-	Quick_sort(num, l, j-1);
-	Quick_sort(num, i+1, r);
 }
 
 void swap(unsigned *a, unsigned *b){
